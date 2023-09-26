@@ -1,0 +1,30 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.container{
+    width: 100%;
+    height: auto;
+}
+
+.container .counter{
+    position: absolute;
+    color: black;
+    left: 45px;
+    top: 180px;
+    font-family: Arial, sans-serif;
+    font-weight: 800;
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+}
+
+.container .text{
+    position: absolute;
+    color: black;
+    left: 300px;
+    top: 180px;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+}
