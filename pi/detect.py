@@ -20,43 +20,64 @@ if not cap.isOpened():
     exit()
 cur_frame, prev_frame = None, None
 motion_detected = False
+import cv2
+import tensorflow as tf
 
-mog = cv.createBackgroundSubtractorMOG2()
 
-while True:
-    # Capture frame-by-frame
-    ret, frame = cap.read()
-    # if frame is read correctly ret is True
-    if not ret:
-        print("Can't receive frame (stream end?). Exiting ...")
-        break
-    # Our operations on the frame come here
-    cur_frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-    cur_frame = cv.GaussianBlur(cur_frame, (21, 21), 0)
-    if prev_frame is None:
-        prev_frame = cur_frame
-        continue
-    fgmask = mog.apply(cur_frame)
-    kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
-    fgmask = cv.erode(fgmask, kernel, iterations=1)
-    fgmask = cv.dilate(fgmask, kernel, iterations=1)
+class CarDetector:
+    def __init__(self, model_path):
+        self.interpreter = tf.lite.Interpreter(model_path=model_path)
+        self.interpreter.allocate_tensors()
+        self.input_details = self.interpreter.get_input_details()
+        self.output_details = self.interpreter.get_output_details()
 
-    contours, hierarchy = cv.findContours(fgmask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    def detect(self, image):
+        # Preprocess the image
+        input_tensor = cv2.resize(image, (self.input_details[0]['shape'][2], self.input_details[0]['shape'][1]))
+        input_tensor = input_tensor.astype(np.uint8)
+        input_tensor = np.expand_dims(input_tensor, axis=0)
 
-    for contour in contours:
-        # Ignore small contours
-        if cv.contourArea(contour) < 1000:
-            continue
+        # Run inference
+        self.interpreter.set_tensor(self.input_details[0]['index'], input_tensor)
+        self.interpreter.invoke()
 
-        # Draw bounding box around contour
-        x, y, w, h = cv.boundingRect(contour)
-        cv.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        # Extract output data
+        boxes = self.interpreter.get_tensor(self.output_details[0]['index'])[0]
+        class_ids = self.interpreter.get_tensor(self.output_details[1]['index'])[0]
+        scores = self.interpreter.get_tensor(self.output_details[2]['index'])[0]
 
-    cv.imshow('Motion Detection', frame)
-    # Display the resulting frame
+        return boxes, class_ids, scores
 
-    if cv.waitKey(1) == ord('q'):
-        break
-# When everything done, release the capture
-cap.release()
-cv.destroyAllWindows()
+    def draw_boxes(self, image, boxes, class_ids, scores, threshold=0.5):
+        height, width, _ = image.shape
+        for i in range(len(scores)):
+            if scores[i] > threshold:  # assuming class '3' is for cars
+                box = boxes[i]
+                y1, x1, y2, x2 = int(box[0] * height), int(box[1] * width), int(box[2] * height), int(box[3] * width)
+                cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        return image
+
+
+def main(model_path):
+    cap = cv2.VideoCapture(0)  # Use the default camera
+    detector = CarDetector(model_path)
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        boxes, class_ids, scores = detector.detect(frame)
+        frame = detector.draw_boxes(frame, boxes, class_ids, scores, threshold=0.5)
+
+        cv2.imshow('Car Detection', frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+
+if __name__ == "__main__":
+    model_path = "models/lite-model_efficientdet_lite0_detection_default_1.tflite"
+    main(model_path)
