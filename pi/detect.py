@@ -21,12 +21,17 @@ if not cap.isOpened():
 cur_frame, prev_frame = None, None
 motion_detected = False
 import cv2
-import tensorflow as tf
+import platform
 
 
 class CarDetector:
     def __init__(self, model_path):
-        self.interpreter = tf.lite.Interpreter(model_path=model_path)
+        if platform.system() == 'Windows':
+            import tensorflow as tf
+            self.interpreter = tf.lite.Interpreter(model_path=model_path)
+        else:
+            import tflite_runtime.interpreter as tflite
+            self.interpreter = tflite.Interpreter(model_path=model_path)
         self.interpreter.allocate_tensors()
         self.input_details = self.interpreter.get_input_details()
         self.output_details = self.interpreter.get_output_details()
