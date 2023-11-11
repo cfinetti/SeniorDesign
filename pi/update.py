@@ -1,6 +1,6 @@
 import requests
 
-SERVER_URL = 'http://<server_ip>:<port>'
+SERVER_URL = 'http://172.31.56.243:5000'
 
 def send_increase():
     """Sends a request to the server to increase parking lot capacity."""
