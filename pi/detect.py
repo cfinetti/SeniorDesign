@@ -20,7 +20,7 @@ if not cap.isOpened():
     exit()
 cur_frame, prev_frame = None, None
 
-mog = cv.BackgroundSubtractorMOG2()
+mog = cv.createBackgroundSubtractorMOG2()
 
 while True:
     # Capture frame-by-frame
@@ -41,7 +41,7 @@ while True:
     fgmask = cv.dilate(fgmask, kernel, iterations=1)
 
     # Find contours
-    contours, _ = cv.findContours(fgmask.copy(), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    _, contours, _ = cv.findContours(fgmask.copy(), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
     for contour in contours:
         # Ignore small contours
