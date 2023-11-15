@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UT Parking</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <script src="/static/js/map.js"></script>
+    <script src="/static/js/websocket.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    
+</head>
+</head>
+<body>
+    <!--<script src="script.js"></script>-->
+    <div class="container">
+        <div class="container">
+            <div class="description">
+                <img src="/static/images/UT_logo_header.svg"/>
+                <h1 style="padding-top: 20px; padding-bottom: 10px;">Parking Availability</h1>
+                <p>Here you can see the real-time parking availability on campus. The map is updated in real-time to reflect the current status of each parking lot.</p>
+                <p style="padding-bottom: 0px; padding-top: 10px;">The markers correspond to the portion of spaces left as follows:</p>
+                <div class="color-key">
+                    <div class="key-item"><span class="key-color green"></span>100-75% (Green)</div>
+                    <div class="key-item"><span class="key-color yellow"></span>50-25% (Yellow)</div>
+                    <div class="key-item"><span class="key-color red"></span>25-0% (Red)</div>
+                </div>
+                <div style="flex-grow: 1;"></div>
+                <p style="color:grey; font-style: italic;">Senior design project by Kieran Miller, Dominic DiPofi, Collin Finetti, and Zakaria Obeid.</p>
+            </div>
+            <div id="mapid" style="width: 100%;"></div>
+    </div>
+</body>
+</html>
