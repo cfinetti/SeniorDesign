@@ -5,12 +5,12 @@ from data import parking_lots, map_start_position
 app = Flask(__name__)
 socketio = SocketIO(app)
 
-def emit_parking(spots):
+def emit_parking():
     socketio.emit('parking_update', parking_lots)
 
 @socketio.on('connect')
 def on_connect():
-    emit_parking(parking_lots)
+    emit_parking()
 
 @app.route('/')
 def index():

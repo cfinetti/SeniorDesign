@@ -44,7 +44,7 @@ function updateParkingLotMarkers(data) {
     for (var lotId in data) {
         var lotData = data[lotId];
         var marker = parkingLots[lotId];
-        marker.setPopupContent('Available spots: ' + lotData.available);
+        marker.setPopupContent('Area ' + lotId + '<br>' + 'Available spots: ' + lotData.available);
         changeMarkerColor(marker, lotData.available, lotData.capacity);
     }
 }
