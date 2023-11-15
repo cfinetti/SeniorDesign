@@ -1,6 +1,5 @@
 from update import send_decrease;
-
 if send_decrease():
-    print("Decreased capacity successfully.")
+    print("Decreased availability successfully.")
 else:
-    print("Failed to decrease capacity or capacity is already zero.")
+    print("Failed to decrease availability.")

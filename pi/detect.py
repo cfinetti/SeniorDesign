@@ -3,16 +3,16 @@ import cv2 as cv
 from update import send_decrease, send_increase
 
 def car_entered():
-    if send_increase():
-        print("Increased capacity successfully.")
+    if send_decrease():
+        print("Decreased availability successfully.")
     else:
-        print("Failed to increase capacity.")
+        print("Failed to decrease availability.")
 
 def car_exited():
     if send_decrease():
-        print("Decreased capacity successfully.")
+        print("Increased availability successfully.")
     else:
-        print("Failed to decrease capacity or capacity is already zero.")
+        print("Failed to increase availability.")
 
 cap = cv.VideoCapture(0, cv.CAP_DSHOW)
 if not cap.isOpened():
