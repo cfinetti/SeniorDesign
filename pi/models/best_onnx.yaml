@@ -1,0 +1,12 @@
+names:
+- Car
+nc: 1
+roboflow:
+  license: CC BY 4.0
+  project: overhead-vehicle-detection
+  url: https://universe.roboflow.com/university-of-toledo-cgamw/overhead-vehicle-detection/dataset/3
+  version: 3
+  workspace: university-of-toledo-cgamw
+test: ../test/images
+train: Overhead-vehicle-detection-3/train/images
+val: Overhead-vehicle-detection-3/valid/images
