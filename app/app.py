@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, render_template
 from flask_socketio import SocketIO
 from data import parking_lots, map_start_position
+import eventlet
+eventlet.monkey_patch()
 
 app = Flask(__name__)
 socketio = SocketIO(app)
