@@ -1,62 +1,99 @@
+import cv2
 import numpy as np
-import cv2 as cv
 from update import send_decrease, send_increase
-
 def car_entered():
     if send_decrease():
         print("Decreased availability successfully.")
     else:
         print("Failed to decrease availability.")
-
 def car_exited():
     if send_decrease():
         print("Increased availability successfully.")
     else:
         print("Failed to increase availability.")
 
-cap = cv.VideoCapture(0, cv.CAP_DSHOW)
-if not cap.isOpened():
-    print("Cannot open camera")
-    exit()
-cur_frame, prev_frame = None, None
-motion_detected = False
 
-mog = cv.createBackgroundSubtractorMOG2()
+class VehicleTracker:
+    def __init__(self):
+        self.background_subtractor = cv2.createBackgroundSubtractorMOG2(history=100, varThreshold=70)
+        self.active_vehicles = {}  # Stores ID and last known position
+        self.next_vehicle_id = 1
+        self.line_position = 320  # Adjust based on your video feed
+        self.id_positions = {}  # Stores positions of vehicles across frames
+
+    def process_frame(self, frame):
+        fg_mask = self.background_subtractor.apply(frame)
+        contours, _ = cv2.findContours(fg_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        current_centroids = self.extract_centroids(contours, frame)
+        self.update_vehicles(current_centroids, frame)
+
+        # Drawing the line
+        cv2.line(frame, (self.line_position, 0), (self.line_position, frame.shape[0]), (255, 0, 0), 2)
+
+        return frame
+
+    def extract_centroids(self, contours, frame):
+        centroids = []
+        for contour in contours:
+            if cv2.contourArea(contour) > 2000:  # Threshold for vehicle size
+                x, y, w, h = cv2.boundingRect(contour)
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Draw bounding box
+                centroids.append((x + w // 2, y + h // 2))
+        return centroids
+
+    def update_vehicles(self, centroids, frame):
+        for centroid in centroids:
+            matched_id = self.match_vehicle(centroid)
+            if matched_id is None:
+                self.active_vehicles[self.next_vehicle_id] = centroid
+                self.id_positions[self.next_vehicle_id] = [centroid]
+                self.next_vehicle_id += 1
+            else:
+                self.active_vehicles[matched_id] = centroid
+                self.id_positions[matched_id].append(centroid)
+                self.check_direction(matched_id, frame)
+
+    def match_vehicle(self, centroid):
+        for vehicle_id, position in self.active_vehicles.items():
+            if np.linalg.norm(np.array(position) - np.array(centroid)) < 100:  # Matching threshold
+                return vehicle_id
+        return None
+
+    def check_direction(self, vehicle_id, frame):
+        positions = self.id_positions[vehicle_id]
+        if len(positions) < 2:
+            return
+
+        prev_x, prev_y = positions[-2]
+        curr_x, curr_y = positions[-1]
+
+        # Check if the vehicle has crossed the line since the last frame
+        if prev_x < self.line_position <= curr_x:
+            print(f"Vehicle ID {vehicle_id} entered.")
+        elif prev_x > self.line_position >= curr_x:
+            print(f"Vehicle ID {vehicle_id} exited.")
+
+        # Draw the centroid and ID
+        cv2.circle(frame, (curr_x, curr_y), 5, (0, 0, 255), -1)
+        cv2.putText(frame, f'ID: {vehicle_id}', (curr_x - 10, curr_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+# Initialize the video capture and vehicle tracker
+cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # Adjust for Raspberry Pi camera
+cc = cv2.VideoWriter_fourcc(*'XVID')
+file = cv2.VideoWriter('output.avi', cc, 15.0, (640, 480))
+tracker = VehicleTracker()
 
 while True:
-    # Capture frame-by-frame
     ret, frame = cap.read()
-    # if frame is read correctly ret is True
     if not ret:
-        print("Can't receive frame (stream end?). Exiting ...")
         break
-    # Our operations on the frame come here
-    cur_frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-    cur_frame = cv.GaussianBlur(cur_frame, (21, 21), 0)
-    if prev_frame is None:
-        prev_frame = cur_frame
-        continue
-    fgmask = mog.apply(cur_frame)
-    kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
-    fgmask = cv.erode(fgmask, kernel, iterations=1)
-    fgmask = cv.dilate(fgmask, kernel, iterations=1)
 
-    contours, hierarchy = cv.findContours(fgmask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-
-    for contour in contours:
-        # Ignore small contours
-        if cv.contourArea(contour) < 1000:
-            continue
-
-        # Draw bounding box around contour
-        x, y, w, h = cv.boundingRect(contour)
-        cv.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-    cv.imshow('Motion Detection', frame)
-    # Display the resulting frame
-
-    if cv.waitKey(1) == ord('q'):
+    processed_frame = tracker.process_frame(frame)
+    cv2.imshow("Parking Lot Monitoring", processed_frame)
+    file.write(processed_frame);
+    if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-# When everything done, release the capture
+
 cap.release()
-cv.destroyAllWindows()
+cv2.destroyAllWindows()
