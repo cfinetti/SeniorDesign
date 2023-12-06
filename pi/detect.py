@@ -73,7 +73,7 @@ class VehicleTracker:
         if prev_x < self.line_position <= curr_x:
             print(f"Vehicle ID {vehicle_id} entered.")
         elif prev_x > self.line_position >= curr_x:
-            print(f"Vehicle ID {vehicle_id} exited.")qqq
+            print(f"Vehicle ID {vehicle_id} exited.")
 
         # Draw the centroid and ID
         cv2.circle(frame, (curr_x, curr_y), 5, (0, 0, 255), -1)
