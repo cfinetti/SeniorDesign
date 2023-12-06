@@ -73,7 +73,7 @@ class VehicleTracker:
         if prev_x < self.line_position <= curr_x:
             print(f"Vehicle ID {vehicle_id} entered.")
         elif prev_x > self.line_position >= curr_x:
-            print(f"Vehicle ID {vehicle_id} exited.")
+            print(f"Vehicle ID {vehicle_id} exited.")qqq
 
         # Draw the centroid and ID
         cv2.circle(frame, (curr_x, curr_y), 5, (0, 0, 255), -1)
@@ -89,10 +89,7 @@ if on_linux:
     config = piCam.create_preview_configuration(main={"size": (3280, 2464), "format": "RGB888"},
                                                 lores={"size": (640, 480), "format": "YUV420"})
 
-    piCam.preview_configuration.main.size=(640, 480)
-    piCam.preview_configuration.main.format="RGB888"
-    piCam.preview_configuration.align()
-    piCam.configure("preview")
+    piCam.configure(config)
     piCam.start()
 else:
     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
@@ -109,6 +106,6 @@ while True:
     file.write(processed_frame);
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-
-cap.release()
+if not on_linux:
+    cap.release()
 cv2.destroyAllWindows()
