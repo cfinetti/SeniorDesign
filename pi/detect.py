@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import platform
 from update import send_decrease, send_increase
 def car_entered():
     if send_decrease():
@@ -36,7 +37,7 @@ class VehicleTracker:
     def extract_centroids(self, contours, frame):
         centroids = []
         for contour in contours:
-            if cv2.contourArea(contour) > 2000:  # Threshold for vehicle size
+            if cv2.contourArea(contour) > 3000:  # Threshold for vehicle size
                 x, y, w, h = cv2.boundingRect(contour)
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Draw bounding box
                 centroids.append((x + w // 2, y + h // 2))
@@ -73,22 +74,37 @@ class VehicleTracker:
             print(f"Vehicle ID {vehicle_id} entered.")
         elif prev_x > self.line_position >= curr_x:
             print(f"Vehicle ID {vehicle_id} exited.")
+            self.active_vehicles.r
 
         # Draw the centroid and ID
         cv2.circle(frame, (curr_x, curr_y), 5, (0, 0, 255), -1)
         cv2.putText(frame, f'ID: {vehicle_id}', (curr_x - 10, curr_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
 # Initialize the video capture and vehicle tracker
-cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # Adjust for Raspberry Pi camera
+on_linux = platform.system() == 'Linux'
 cc = cv2.VideoWriter_fourcc(*'XVID')
 file = cv2.VideoWriter('output.avi', cc, 15.0, (640, 480))
+if on_linux:
+    from picamera2 import Picamera2
+    piCam = Picamera2()
+    config = piCam.create_preview_configuration(main={"size": (3280, 2464), "format": "RGB888"},
+                                                lores={"size": (640, 480), "format": "YUV420"})
+
+    piCam.preview_configuration.main.size=(640, 480)
+    piCam.preview_configuration.main.format="RGB888"
+    piCam.preview_configuration.align()
+    piCam.configure("preview")
+    piCam.start()
+else:
+    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+
 tracker = VehicleTracker()
 
 while True:
-    ret, frame = cap.read()
-    if not ret:
-        break
-
+    if on_linux:
+        frame = piCam.capture_array("lores")
+    else :
+        ret, frame = cap.read()
     processed_frame = tracker.process_frame(frame)
     cv2.imshow("Parking Lot Monitoring", processed_frame)
     file.write(processed_frame);
