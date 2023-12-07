@@ -30,7 +30,8 @@ async function initMap() {
         maxZoom: 19,
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
-    map
+    map.setMaxBounds(map.getBounds().pad(0.75))
+    map.setMinZoom(15)
     response = await fetch('/api/parking_lots');
     lots = await response.json();
     for (let id in lots) {
