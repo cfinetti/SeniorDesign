@@ -47,7 +47,9 @@ function updateParkingLotMarkers(data) {
     for (var lotId in data) {
         var lotData = data[lotId];
         var marker = parkingLots[lotId];
-        marker.setPopupContent(`Area ${lotId}<br>Available spots: ${Math.max(0, lotData.available)} / ${lotData.capacity}`);
+        var available = Math.max(0, lotData.available)
+        available = Math.min(available, lotData.capacity)
+        marker.setPopupContent(`Area ${lotId}<br>Available spots: ${available} / ${lotData.capacity}`);
         changeMarkerColor(marker, lotData.available, lotData.capacity);
     }
 }
