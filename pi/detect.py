@@ -1,14 +1,17 @@
 import cv2
 import numpy as np
 import platform
+import asyncio
 from update import send_decrease, send_increase
-def car_entered():
-    if send_decrease():
+
+async def car_entered():
+    if await send_decrease():
         print("Decreased availability successfully.")
     else:
         print("Failed to decrease availability.")
-def car_exited():
-    if send_decrease():
+
+async def car_exited():
+    if await send_decrease():
         print("Increased availability successfully.")
     else:
         print("Failed to increase availability.")
@@ -72,10 +75,10 @@ class VehicleTracker:
         # Check if the vehicle has crossed the line since the last frame
         if prev_x < self.line_position <= curr_x:
             print(f"Vehicle ID {vehicle_id} entered.")
-            car_entered()
+            asyncio.run(car_entered())
         elif prev_x > self.line_position >= curr_x:
             print(f"Vehicle ID {vehicle_id} exited.")
-            car_exited()
+            asyncio.run(car_exited())
 
         # Draw the centroid and ID
         cv2.circle(frame, (curr_x, curr_y), 5, (0, 0, 255), -1)
