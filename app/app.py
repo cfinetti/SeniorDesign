@@ -10,8 +10,8 @@ socketio = SocketIO(app)
 def emit_parking():
     socketio.emit('parking_update', parking_lots)
 
-@socketio.on('connect')
-def on_connect():
+@socketio.on('client_ready')
+def handle_client_ready():
     emit_parking()
 
 @app.route('/')
@@ -51,4 +51,4 @@ def get_map_position():
     return jsonify(map_start_position)
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host='0.0.0.0')
+    socketio.run(app, debug=True, host='0.0.0.0', port='6570')

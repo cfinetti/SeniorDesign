@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', async function() {
-    initMap();
+    await initMap();
     initWebSocket();
+    socket.emit('client_ready')
 });

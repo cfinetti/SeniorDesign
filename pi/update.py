@@ -1,6 +1,6 @@
 import requests
 PARKING_LOT_ID = '20'
-SERVER_URL = 'http://10.0.23.52:5000'
+SERVER_URL = 'http://10.0.23.52:6570'
 
 def send_increase():
     """Sends a request to the server to increase parking lot capacity."""
