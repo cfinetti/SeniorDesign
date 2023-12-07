@@ -1,6 +1,6 @@
 import requests
 PARKING_LOT_ID = '20'
-SERVER_URL = 'http://10.0.23.52:6570'
+SERVER_URL = 'https://ut-parking-2b4e7c471d76.herokuapp.com'
 
 def send_increase():
     """Sends a request to the server to increase parking lot capacity."""
